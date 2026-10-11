@@ -1,0 +1,26 @@
+{
+  "python.analysis.extraPaths": [
+    "E:/HackingEmulation/Ghidra/ghidra_11.4.2_PUBLIC/support",
+    "${workspaceFolder}/venv/Lib/site-packages/ghidra-stubs"
+  ],
+  "python.analysis.typeCheckingMode": "basic",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.pylintArgs": [
+    "--disable=import-error",
+    "--extension-pkg-allow-list=ghidra"
+  ],
+  "files.associations": {
+    "*.py": "python"
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe",
+  "python.analysis.stubPath": "${workspaceFolder}/venv/Lib/site-packages",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.completeFunctionParens": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.intelliSense.extraPaths": [
+    "E:/HackingEmulation/Ghidra/ghidra_11.4.2_PUBLIC/support",
+    "E:/HackingEmulation/Ghidra/ghidra_11.4.2_PUBLIC/Ghidra/Framework",
+    "${workspaceFolder}/venv/Lib/site-packages/ghidra-stubs"
+  ]
+}

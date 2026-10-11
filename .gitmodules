@@ -1,0 +1,3 @@
+[submodule "external/ps4_module_loader"]
+	path = external/ps4_module_loader
+	url = https://github.com/SocraticBliss/ps4_module_loader.git

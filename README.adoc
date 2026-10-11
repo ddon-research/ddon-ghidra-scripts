@@ -1,0 +1,85 @@
+= DDON Ghidra Scripts
+:toc:
+:toc-placement!:
+
+Ghidra 11.4.2 / PyGhidra scripts used to research Dragon's Dogma Online (DDON) client binaries,
+mainly the PS4 `DDOORBIS.elf` (build 02020005) with its DWARF debug symbols.
+
+toc::[]
+
+== Status: archived
+
+This is the earlier, Ghidra-based approach to recovering class layouts and serialization code. It
+has been superseded by the DWARF reconstructors (`ddon-dwarf-reconstructor`, Python, and its Rust
+successor), which read the DWARF directly and generate compilable C++.
+
+The scripts still work (verified 2026-10-11, see <<verification>>) and are kept for reference and
+for the one remaining consumer: the `ddon-data` knowledge graph imports `graph` mode exports as
+`ddon-binary-analyzer` evidence (`ghidra_pcode` observations).
+
+Provenance: copied from `ddon-research/ddon-data` `research/ghidra/` at `33761c797c6` plus the
+then-uncommitted `graph` export mode; the git history stays in `ddon-data`.
+
+== Layout
+
+[cols="1,3"]
+|===
+|Path |Contents
+
+|`headless-scripts/run_ghidra_analysis.sh`
+|Runner: starts PyGhidra headless against a Ghidra project and runs `ddon-binary-analyzer/main.py`
+in `dwarf`, `function`, or `graph` mode.
+
+|`headless-scripts/ddon-binary-analyzer/`
+|The analyzer package (`symbol_explorer`, `function_analyzer`, `shared`), tests, tracked
+`.vscode/settings.json`, and `setup-venv.sh` for the editor environment. See its `README.adoc` and
+`VSCODE_SETUP.adoc`.
+
+|`standalone-scripts/`
+|Single-file scripts for Ghidra's Script Manager (GUI): `create_vtable.py`,
+`fix_relocation_table.py`, and the original single-file `dwarf_symbol_explorer.py` and
+`function_decompilation_analyzer.py` that the headless analyzer was refactored from.
+`translate_ps4_aerolib.py` converts `aerolib.csv` to `ps4database.xml` for
+https://github.com/jogolden/GhidraPS4Loader[GhidraPS4Loader].
+
+|`external/ps4_module_loader/`
+|Git submodule of https://github.com/SocraticBliss/ps4_module_loader[SocraticBliss/ps4_module_loader],
+the source of `aerolib.csv` (PS4 NID to symbol names).
+|===
+
+== Quick start
+
+[source,bash]
+----
+git clone --recurse-submodules git@github.com:ddon-research/ddon-ghidra-scripts.git
+cd ddon-ghidra-scripts/headless-scripts
+cp .env.template .env        # set PYGHIDRA_RUN, PROJECT_DIR, PROJECT_NAME, SCRIPTS_BASE_DIR
+
+./run_ghidra_analysis.sh dwarf "rLandInfo" "DDOORBIS.elf"            # C++ struct definitions
+./run_ghidra_analysis.sh function "rLandInfo::load" "DDOORBIS.elf"   # decompiled call graph
+./run_ghidra_analysis.sh graph "rLayout::load" "DDOORBIS.elf" out/rLayout INFO 2 ps4-02020005
+----
+
+All modes open the Ghidra project `-readOnly`. Earlier versions opened it writable in `dwarf` and
+`function` mode, which made headless Ghidra re-save the ~2 GB program database on every run.
+
+`ps4database.xml` is generated, not tracked:
+
+[source,bash]
+----
+git submodule update --init
+python standalone-scripts/translate_ps4_aerolib.py -o ps4database.xml
+----
+
+[[verification]]
+== Verification (2026-10-11)
+
+Against `D:/research/DDON-binaries/Ghidra11.4/PS4_DDON_02020005_2016_12_21`, Ghidra 11.4.2:
+
+* `graph rLayout::load` (depth 2): exit 0, wrote `manifest.json`, `nodes.jsonl`,
+  `relationships.jsonl` in about 24 s.
+* `dwarf rLandInfo` and `function rLandInfo::load` (depth 2): exit 0 with C++ definitions and
+  decompiled `rLandInfo::load`; with `-readOnly` no program database file changed.
+* `tests/test_graph_export.py`: 1 passed (pytest via `uvx --python 3.12 pytest tests`).
+* `translate_ps4_aerolib.py` on the submodule's `aerolib.csv` reproduces the previously used
+  `ps4database.xml` byte for byte.

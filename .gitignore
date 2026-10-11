@@ -1,0 +1,18 @@
+# Local configuration (copy headless-scripts/.env.template to .env)
+.env
+
+# Environments and caches
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.idea/
+
+# Run logs
+headless-scripts/logs/
+
+# Generated from external/ps4_module_loader/aerolib.csv by translate_ps4_aerolib.py
+ps4database.xml
